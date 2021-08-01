@@ -16,6 +16,9 @@ const subscribtions = sequelize.define('Subscribtions', {
         type: DataTypes.STRING,
         allowNull: false
     }
+},{
+    createdAt: false,
+    updatedAt: false
 });
 
 module.exports = subscribtions;

@@ -74,7 +74,7 @@ route.post('/findall', async (req, res) => {
                     });
                 res.status(200).json(result);
             } else {
-                res.status(404).json('Не найдено');
+                res.status(404).json('Подписок нет');
             }
         })
         .catch(err => res.status(500).json('Ошибка сервера'));      

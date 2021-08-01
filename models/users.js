@@ -39,6 +39,9 @@ const users = sequelize.define('Users', {
         type: DataTypes.STRING,
         allowNull: true
     }
+},{
+    createdAt: false,
+    updatedAt: false
 });
 
 module.exports = users;

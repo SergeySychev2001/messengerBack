@@ -23,6 +23,9 @@ const news = sequelize.define('News', {
         type: DataTypes.DATE,
         allowNull: false
     }
+},{
+    createdAt: false,
+    updatedAt: false
 });
 
 module.exports = news;
