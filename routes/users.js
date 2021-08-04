@@ -84,7 +84,16 @@ route.post("/user/edit/data/:id", async(req, res) => {
     const { name, surname, day, month, year, city } = req.body;
     try {
         await users.update({ name, surname, year: new Date(`${+year}-${+month + 1}-${+day}`), city}, {where: {id}});
-        res.status(200).json('Данные успешно обновлены');
+        const {dataValues} = await users.findOne({where: {id}});
+        const newUser = {
+            id: dataValues.id,
+            name: dataValues.name,
+            surname: dataValues.surname,
+            year: dataValues.year,
+            city: dataValues.city,
+            avatar: dataValues.avatar
+        }
+        res.status(200).json(newUser);
     } catch (e) {
         res.status(500).json('Ошибка сервера');
     }
@@ -94,10 +103,19 @@ route.post("/user/edit/avatar/:id", upload.single('avatar'), (req, res) => {
     const {id} = req.params;
     const filePath = `${getUsersMediaDir(id)}/avatar.jpg`;
     copyFile(req.file.path, filePath)
-    .then( async (res) => {
+    .then( async (response) => {
         try {
             await users.update({avatar: true}, {where: {id}});
-            res.status(200).json('Данные успешно обновлены');
+            const {dataValues} = await users.findOne({where: {id}});
+            const newUser = {
+                id: dataValues.id,
+                name: dataValues.name,
+                surname: dataValues.surname,
+                year: dataValues.year,
+                city: dataValues.city,
+                avatar: dataValues.avatar
+            }
+            res.status(200).json(newUser);
         } catch (e) {
             res.status(500).json('Ошибка сервера');
         }
