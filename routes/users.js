@@ -32,10 +32,11 @@ const getUsersMediaDir = (id) => {
     return dir;
 }
 
-route.get("/user/avatar/:id", async (req, res) => {
-    const id = req.params.id;
-    const user = await users.findOne({where: {id: id.toString()}});
-    res.sendFile(`${getUsersMediaDir(id)}/avatar.jpg`);
+route.get("/user/avatar/:user/:image", async (req, res) => {
+    const userId = req.params.user;
+    const image = req.params.image;
+    const userDirectory = getUsersMediaDir(userId);
+    res.sendFile(`${userDirectory}/${image}`);
 });
 
 route.get("/user/data/:id", async (req, res) => {
@@ -58,7 +59,6 @@ route.get("/user/data/:id", async (req, res) => {
 
 route.get("/user/data/", async (req, res) => {
     try {
-        const id = req.params.id;
         const findedUsers = await users.findAll();
         const result = findedUsers.map((item) => {
         const date = new Date(item.year);
@@ -101,21 +101,26 @@ route.post("/user/edit/data/:id", async(req, res) => {
 
 route.post("/user/edit/avatar/:id", upload.single('avatar'), (req, res) => {
     const {id} = req.params;
-    const filePath = `${getUsersMediaDir(id)}/avatar.jpg`;
+    const fileName = `${v4()}.jpg`;
+    const userDirectory = getUsersMediaDir(id);
+    const filePath = `${userDirectory}/${fileName}`;
     copyFile(req.file.path, filePath)
     .then( async (response) => {
         try {
-            await users.update({avatar: true}, {where: {id}});
-            const {dataValues} = await users.findOne({where: {id}});
-            const newUser = {
-                id: dataValues.id,
-                name: dataValues.name,
-                surname: dataValues.surname,
-                year: dataValues.year,
-                city: dataValues.city,
-                avatar: dataValues.avatar
+            await users.update({avatar: `http://localhost:4000/api/users/user/avatar/${id}/${fileName}`}, {where: {id}});
+            fs.readdir(userDirectory, (err, files) => {
+                files.map(item => {
+                    if(item !== fileName){
+                        fs.unlink(path.join(userDirectory, item), err => {
+                            if (err) throw err;
+                          });
+                    }
+                });
+            });
+            const newUserAvatar = {
+                avatar: `http://localhost:4000/api/users/user/avatar/${id}/${fileName}`
             }
-            res.status(200).json(newUser);
+            res.status(200).json(newUserAvatar);
         } catch (e) {
             res.status(500).json('Ошибка сервера');
         }
@@ -155,7 +160,7 @@ route.post("/signup", async (req, res) => {
             id,
             name: name.toString(),
             surname: surname.toString(),
-            avatar: false,
+            avatar: null,
             year: new Date(`${+year}-${+month}-${+day + 1}`),
             email: email.toString(),
             login: login.toString(),

@@ -16,7 +16,7 @@ const users = sequelize.define('Users', {
         allowNull: false
     },
     avatar: {
-        type: DataTypes.BOOLEAN,
+        type: DataTypes.STRING,
         allowNull: true
     },
     year: {
